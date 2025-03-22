@@ -23,13 +23,13 @@ import static org.nanonative.nano.helper.config.ConfigRegister.registerConfig;
  */
 public class MongoDbService extends Service {
 
-    public static final String app_service_mongodb_uri = registerConfig(
-        "mongo.uri",
+    public static final String CONFIG_MONGO_URI = registerConfig(
+        "mapp_service_mongodb_uri",
         "MongoDB connection URI (e.g. mongodb://localhost:27017)"
     );
 
-    public static final String app_service_mongodb_name = registerConfig(
-        "mongo.db",
+    public static final String CONFIG_MONGO_DB = registerConfig(
+        "app_service_mongodb_name",
         "Database name"
     );
 
@@ -49,8 +49,8 @@ public class MongoDbService extends Service {
      */
     @Override
     public void start() {
-        this.uri = context.asString(app_service_mongodb_uri);
-        this.databaseName = context.asString(app_service_mongodb_name);
+        this.uri = context.asString(CONFIG_MONGO_URI);
+        this.databaseName = context.asString(CONFIG_MONGO_DB);
 
         context.info(() -> "Starting MongoDB service...");
 
