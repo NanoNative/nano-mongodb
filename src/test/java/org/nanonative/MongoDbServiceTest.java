@@ -7,9 +7,7 @@ import org.nanonative.nano.services.logging.model.LogLevel;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import org.nanonative.nano.services.logging.LogService;
 import static org.nanonative.nano.services.logging.LogService.CONFIG_LOG_LEVEL;
-
 
 class MongoDbServiceTest {
 
@@ -24,7 +22,6 @@ class MongoDbServiceTest {
                 MongoDbService.app_service_mongodb_uri, "mongodb://localhost:27017",
                 MongoDbService.app_service_mongodb_name, "testdb"
             ),
-            new LogService(), // Ajout du LogService
             new MongoDbService() // Service à tester
         );
 
