@@ -33,11 +33,6 @@ public class MongoDbService extends Service {
         "Database name"
     );
 
-    public static final String CONFIG_MONGO_COLLECTION = registerConfig(
-        "mongo.collection",
-        "Default collection name"
-    );
-
     private MongoClient mongoClient;
     private MongoDatabase database;
     private String databaseName;
