@@ -5,10 +5,38 @@ import berlin.yuna.typemap.model.TypeMapI;
 import org.nanonative.nano.core.model.Service;
 import org.nanonative.nano.helper.event.model.Event;
 
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import org.nanonative.nano.services.logging.LogService;
+
+import static org.nanonative.nano.helper.config.ConfigRegister.registerConfig;
+
+
 /**
  * SEE ALSO {@link org.nanonative.nano.services.logging.LogService} for example implementation
  */
 public class MongoDbService extends Service {
+
+    public static final String CONFIG_MONGO_URI = registerConfig(
+        "mapp_service_mongodb_uri",
+        "MongoDB connection URI (e.g. mongodb://localhost:27017)"
+    );
+
+    public static final String CONFIG_MONGO_DB = registerConfig(
+        "app_service_mongodb_name",
+        "Database name"
+    );
+
+    private MongoClient mongoClient;
+    private MongoDatabase database;
+    private String databaseName;
+    private String uri;
 
     /**
      * Starts the service. This method is called during service initialization.
@@ -21,7 +49,24 @@ public class MongoDbService extends Service {
      */
     @Override
     public void start() {
+        this.uri = context.asString(CONFIG_MONGO_URI);
+        this.databaseName = context.asString(CONFIG_MONGO_DB);
 
+        context.info(() -> "Starting MongoDB service...");
+
+        try {
+            MongoClientSettings settings = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(uri))
+                .build();
+
+            mongoClient = MongoClients.create(settings);
+            database = mongoClient.getDatabase(databaseName);
+
+            context.info(() -> "Connected to MongoDB [URI: " + uri + "]");
+
+        } catch (Exception e) {
+            context.error(() -> "MongoDB Connection failed: " + e.getMessage(), e);
+        }
     }
 
     /**
@@ -92,4 +137,5 @@ public class MongoDbService extends Service {
             .putR("name", this.getClass().getSimpleName())
             .toJson();
     }
+
 }
