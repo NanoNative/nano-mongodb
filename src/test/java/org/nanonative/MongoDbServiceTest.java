@@ -7,7 +7,9 @@ import org.nanonative.nano.services.logging.model.LogLevel;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.nanonative.nano.services.logging.LogService;
 import static org.nanonative.nano.services.logging.LogService.CONFIG_LOG_LEVEL;
+
 
 class MongoDbServiceTest {
 
@@ -17,11 +19,16 @@ class MongoDbServiceTest {
     @RepeatedTest(TEST_REPEAT)
     void serviceShouldStart_successfully() {
         final Nano nano = new Nano(
-            Map.of(CONFIG_LOG_LEVEL, TEST_LOG_LEVEL), // configs
-            new MongoDbService() // service to test
+            Map.of(
+                CONFIG_LOG_LEVEL, TEST_LOG_LEVEL,
+                MongoDbService.CONFIG_MONGO_URI, "mongodb://localhost:27017",
+                MongoDbService.CONFIG_MONGO_DB, "testdb"
+            ),
+            new LogService(), // Ajout du LogService
+            new MongoDbService() // Service à tester
         );
 
-        assertThat(nano).isNotNull();
-        assertThat(nano.stop(this.getClass()).waitForStop().isReady()).isFalse(); // shutdown nano
+        assertThat(nano.isReady()).isTrue();
+        assertThat(nano.stop(this.getClass()).waitForStop().isReady()).isFalse();
     }
 }
