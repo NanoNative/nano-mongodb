@@ -21,8 +21,8 @@ class MongoDbServiceTest {
         final Nano nano = new Nano(
             Map.of(
                 CONFIG_LOG_LEVEL, TEST_LOG_LEVEL,
-                MongoDbService.CONFIG_MONGO_URI, "mongodb://localhost:27017",
-                MongoDbService.CONFIG_MONGO_DB, "testdb"
+                MongoDbService.app_service_mongodb_uri, "mongodb://localhost:27017",
+                MongoDbService.app_service_mongodb_name, "testdb"
             ),
             new LogService(), // Ajout du LogService
             new MongoDbService() // Service à tester
