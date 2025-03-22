@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.nanonative</groupId>
+    <artifactId>nano-mongodb</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <!-- PROPERTIES -->
+        <java-version>21</java-version>
+        <project.encoding>UTF-8</project.encoding>
+        <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
+
+        <!-- PRODUCTION -->
+        <nano.version>2025.0.7</nano.version>
+
+        <!-- TEST -->
+        <junit.version>5.12.0</junit.version>
+        <assertj-core.version>3.27.3</assertj-core.version>
+        <junit-launcher.version>1.12.0</junit-launcher.version>
+
+        <!-- BUILD -->
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
+        <native-image-maven-plugin.version>0.10.2</native-image-maven-plugin.version>
+        <maven.compiler.source>${java-version}</maven.compiler.source>
+        <maven.compiler.target>${java-version}</maven.compiler.target>
+        <maven.compiler.release>${java-version}</maven.compiler.release>
+    </properties>
+
+    <dependencies>
+        <!-- PRODUCTION -->
+        <dependency>
+            <groupId>org.nanonative</groupId>
+            <artifactId>nano</artifactId>
+            <version>${nano.version}</version>
+        </dependency>
+
+        <!-- TEST -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit-launcher.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.name}-no-dependencies</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${java-version}</source>
+                    <target>${java-version}</target>
+                    <release>${java-version}</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.6.0</version>
+                <!--configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>org.nanonative.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration-->
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.name}</finalName>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!-- NATIVE COMPILATION -->
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <version>${native-image-maven-plugin.version}</version>
+                        <configuration>
+                            <imageName>${project.name}.native</imageName>
+                            <mainClass>org.nanonative.Main</mainClass>
+                            <buildArgs>
+                                <!-- Reduces the image size - Ensures the native image doesn't include the JVM as a fallback option -->
+                                <buildArg>--no-fallback</buildArg>
+                                <!-- Disables the use of the GraalVM compilation server -->
+                                <buildArg>--no-server</buildArg>
+                                <!-- Improve startup time - Initialize classes at build time rather than at runtime -->
+                                <buildArg>--initialize-at-build-time</buildArg>
+                                <!-- Aggressively remove unused code -->
+                                <buildArg>--allow-incomplete-classpath</buildArg>
+                                <!-- Install exit handlers to properly handle app termination -->
+                                <buildArg>--install-exit-handlers</buildArg>
+                                <!-- Report unsupported elements at runtime not at build time -->
+                                <buildArg>--report-unsupported-elements-at-runtime</buildArg>
+                                <!-- epsilon = if you don’t want garbage collection at all -->
+                                <!-- serial = if you need basic garbage collection -->
+                                <!-- Default Serial garbage collector -->
+                                <buildArg>--gc=serial</buildArg>
+                                <!-- compatibility = for best compatibility-->
+                                <!-- native = for best performance for machine with the same CPU features -->
+                                <!-- Defaults to x86-64-v3 on AMD64 and armv8-a on AArch64 -->
+                                <!-- <buildArg>-march=native</buildArg>-->
+                            </buildArgs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile-no-fork</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>
